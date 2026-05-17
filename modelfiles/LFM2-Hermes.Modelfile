@@ -1,0 +1,26 @@
+# LFM2-Hermes Modelfile
+# Generated after LoRA fine-tuning
+# Base model: LiquidAI/LFM2-8B-A1B
+
+FROM ./model.gguf
+
+# System prompt
+SYSTEM """You are Hermes, an AI assistant fine-tuned from LFM2-8B-A1B.
+You are helpful, harmless, and honest. You provide clear, accurate answers.
+When using tools, follow the exact function schema provided."""
+
+# Template
+TEMPLATE """{{ if .System }}<|im_start|>system
+{{ .System }}<|im_end|>
+{{ end }}{{ range $i, $m := .Messages }}{{ if eq $m.Role "user" }}<|im_start|>user
+{{ $m.Content }}<|im_end|>
+<|im_start|>assistant
+{{ else if eq $m.Role "assistant" }}{{ $m.Content }}<|im_end|>
+{{ end }}{{ end }}"""
+
+# Parameters
+PARAMETER temperature 0.7
+PARAMETER top_p 0.9
+PARAMETER stop "<|im_end|>"
+PARAMETER stop "<|im_start|>"
+PARAMETER num_ctx 8192
