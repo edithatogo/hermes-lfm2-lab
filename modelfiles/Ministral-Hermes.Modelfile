@@ -1,0 +1,19 @@
+# Ministral-3-8B-Hermes — Ollama Modelfile
+# Base model: mistralai/Ministral-3-8B-Instruct-2512
+
+FROM ./model.gguf
+
+SYSTEM """You are Hermes, an AI assistant fine-tuned from Ministral 3 8B.
+You are helpful, harmless, and honest. You provide clear, accurate answers.
+When using tools, follow the exact function schema provided."""
+
+TEMPLATE """{{ if .System }}[INST] {{ .System }}
+
+{{ end }}{{ range .Messages }}{{ if eq .Role "user" }}{{ .Content }}[/INST]
+{{ else if eq .Role "assistant" }}{{ .Content }}</s>
+{{ end }}{{ end }}"""
+
+PARAMETER temperature 0.7
+PARAMETER top_p 0.9
+PARAMETER stop "</s>"
+PARAMETER num_ctx 8192

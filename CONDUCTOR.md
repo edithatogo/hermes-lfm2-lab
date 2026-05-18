@@ -34,13 +34,16 @@ This repo is Track 2 of the Hermes Training Hub.
 
 ## Key Differences from Gemma 4
 
-| Aspect | Gemma 4 | LFM2 |
-|--------|---------|------|
-| Model size | 4B (all active) | 8B (1B active, MoE) |
-| License | Apache 2.0 | Other (check before publishing) |
-| Chat template | `<\|start_header_id\|>` ... `<\|eot_id\|>` | `<\|im_start\|>` ... `<\|im_end\|>` |
-| Modelfile | `modelfiles/Gemma4-Hermes.Modelfile` | `modelfiles/LFM2-Hermes.Modelfile` |
-| Training config | `scripts/train_config.yaml` (G4 config) | `scripts/train_config.yaml` (LFM2 config) |
+| Aspect | Gemma 4 | Ministral 3 8B (replaces LFM2) |
+|--------|---------|-------------------------------|
+| Model size | 4B (all active) | 8B |
+| License | Apache 2.0 | Apache 2.0 |
+| Chat template | `<\|start_header_id\|>` ... `<\|eot_id\|>` | `[INST]` ... `[/INST]` |
+| Modelfile | `modelfiles/Gemma4-Hermes.Modelfile` | `modelfiles/Ministral-Hermes.Modelfile` |
+| Training config | `scripts/train_config.yaml` (G4 config) | `scripts/train_config.yaml` (Ministral config) |
+
+**Note:** Originally scaffolded for LFM2-8B-A1B but that model has restricted access.
+Switched to Ministral 3 8B (Apache 2.0, well-supported).
 
 ## Contracts in Effect
 
