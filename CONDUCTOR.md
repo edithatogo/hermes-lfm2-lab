@@ -1,61 +1,76 @@
-# LFM2 — Conductor Setup
+# LFM2/LFM2.5 — Conductor Context
 
-This repo is Track 2 of the Hermes Training Hub.
+This repo is the LFM-family training track for the Hermes Training Hub.
 
 ## Hub References
 
 | Document | Location |
-|----------|----------|
+|---|---|
 | Hub conductor | `/Users/doughnut/GitHub/hermes-training/CONDUCTOR.md` |
-| MoSCoW requirements | `/Users/doughnut/GitHub/hermes-training/REQUIREMENTS.md` |
-| Architecture design | `/Users/doughnut/GitHub/hermes-training/DESIGN.md` |
-| Interface contracts | `/Users/doughnut/GitHub/hermes-training/CONTRACTS.md` |
+| Benchmark plan | `/Users/doughnut/GitHub/hermes-training/BENCHMARKING_PLAN.md` |
+| Standard benchmarks | `/Users/doughnut/GitHub/hermes-training/STANDARD_BENCHMARKS.md` |
+| Documentation plan | `/Users/doughnut/GitHub/hermes-training/DOCUMENTATION_PLAN.md` |
+| Applications | `/Users/doughnut/GitHub/hermes-training/APPLICATIONS.md` |
 
 ## Track Status
 
 | Requirement | Status |
-|-------------|--------|
-| M1 MLX LoRA pipeline | ✅ scripts copied from gemma4 template |
-| M2 Download dataset | 🔄 download_hermes_dataset.py running |
-| M3 Train on Hermes data | 📋 Planned (after gemma4 pipeline proven) |
-| M4 Save adapter | 📋 Planned |
-| M8 Dataset dedup | ✅ build_dataset.py tested on sample data |
-| M9 Apple Silicon MLX | ✅ mlx + mlx-lm installed |
-| M10 SSD caching | ✅ HF_HOME=/Volumes/PortableSSD/... |
-| S1 Eval comparison | ✅ scripts/evaluate.py + compare.py copied |
-| S3 HF publishing | ✅ scripts/push_to_hf.sh adapted for LFM2 |
+|---|---|
+| MLX LoRA pipeline | Passed smoke training |
+| Dataset splits | Present: train/val/valid/test JSONL |
+| Dataset token audit | LFM2.5 train split: 461 rows / 219,354 tokens |
+| Adapter save path | Verified with LFM2.5 smoke adapter |
+| Apple Silicon memory | LFM2.5 smoke peaked around 3.6 GB |
+| SSD caching | Managed by hub `scripts/env.sh` |
+| Evaluation | Seed eval exists; benchmark expansion required |
+| Publishing | Adapter-only after benchmark promotion |
 
-## Active Processes
+## Current Models
 
-| Process | PID | What |
-|---------|-----|------|
-| proc_2d4febbe46bc | 40038 | Hermes dataset download (LFM2) |
-| proc_21b478290568 | 43197 | LFM2 model pre-download to SSD cache |
+| Model | Role | Status |
+|---|---|---|
+| `LiquidAI/LFM2.5-1.2B-Instruct` | Low-latency Hermes helper / edge assistant | Smoke train passed |
+| `LiquidAI/LFM2.5-1.2B-Thinking` | Reasoning helper candidate | Configured, not trained |
+| `LiquidAI/LFM2-8B-A1B` | MoE-style runtime/fine-tune candidate | Configured, needs proof |
+| `mlx-community/Ministral-3-8B-Instruct-2512-4bit` | Adjacent dense/edge baseline | Configured |
+| `LiquidAI/LFM2-ColBERT-350M` | Retrieval/memory track candidate | Planned, use contrastive/retrieval evals not SFT |
 
-## Key Differences from Gemma 4
+## Proven Run
 
-| Aspect | Gemma 4 | Ministral 3 8B (replaces LFM2) |
-|--------|---------|-------------------------------|
-| Model size | 4B (all active) | 8B |
-| License | Apache 2.0 | Apache 2.0 |
-| Chat template | `<\|start_header_id\|>` ... `<\|eot_id\|>` | `[INST]` ... `[/INST]` |
-| Modelfile | `modelfiles/Gemma4-Hermes.Modelfile` | `modelfiles/Ministral-Hermes.Modelfile` |
-| Training config | `scripts/train_config.yaml` (G4 config) | `scripts/train_config.yaml` (Ministral config) |
+| Field | Value |
+|---|---|
+| Config | `scripts/train_config.lfm25-1.2b-instruct.smoke.yaml` |
+| Iterations | 10 |
+| Trained tokens | 5,462 |
+| Peak memory | ~3.6 GB |
+| Adapter | `experiments/lfm25-1.2b-instruct-smoke/lora_adapter` |
+| Interpretation | Pipeline proof only, not quality proof |
 
-**Note:** Originally scaffolded for LFM2-8B-A1B but that model has restricted access.
-Switched to Ministral 3 8B (Apache 2.0, well-supported).
+## Next Actions
+
+1. Run Hermes-local smoke evaluation on base vs smoke adapter.
+2. Expand local eval set before making quality claims.
+3. Run full-smoke-data training over the current 219k-token train split.
+4. Add a run note with dataset audit, loss, memory, and benchmark output.
+5. Only then decide whether to train LFM2.5-Thinking or move to Qwen3 4B.
 
 ## Contracts in Effect
 
-Same contract set as gemma4 (CONTRACT-001 through CONTRACT-008), with track-specific overrides:
-- CONTRACT-003: LFM2-specific `train_config.yaml`
-- CONTRACT-006: `modelfiles/LFM2-Hermes.Modelfile`
-- CONTRACT-004: `experiments/lfm2-8b-a1b/lora_adapter/`
+- `data/raw/*.jsonl`: raw Hermes-style messages.
+- `data/splits/*.jsonl`: train/val/valid/test split JSONL.
+- `scripts/train_config*.yaml`: MLX LoRA config.
+- `experiments/*/lora_adapter/`: ignored local adapter output.
+- `eval/prompts.jsonl`: seed eval input, to be expanded.
+- `modelfiles/*.Modelfile`: runtime packaging input.
 
-## Context Preservation Notes
+## Application Notes
 
-When working here:
-- This repo is BLOCKED on gemma4 pipeline completion (we want to prove the pipeline first)
-- The LFM2-8B-A1B model is MoE — only 1B parameters active per forward pass
-- Despite 8B total params, training memory is closer to a 1B-2B dense model
-- License restrictions may prevent uploading full weights to HF — publish adapter only
+LFM-family models are best suited for:
+
+- fast local Hermes helper model
+- tool-routing and command-formatting assistant
+- low-latency background summarizer
+- privacy-preserving local workflow assistant
+- retrieval companion when paired with LFM2-ColBERT
+
+They should not be promoted as broad reasoning leaders until benchmarked against Qwen/Hermes/Gemma baselines.

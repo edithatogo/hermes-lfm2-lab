@@ -1,0 +1,21 @@
+model: LiquidAI/LFM2.5-1.2B-Instruct
+# Keep adapter output under the ignored experiments tree.
+adapter_path: experiments/lfm25-1.2b-instruct-full-smoke/lora_adapter
+data: data/splits
+lora_rank: 16
+lora_scale: 20.0
+lora_dropout: 0.0
+lora_layers: 16
+# Full-smoke-data should stretch beyond the 10-iteration smoke proof
+# while keeping the max sequence length aligned with the current split shape.
+batch_size: 2
+iters: 200
+val_batches: 10
+steps_per_report: 25
+steps_per_eval: 100
+steps_per_save: 100
+max_seq_length: 2048
+learning_rate: 1e-4
+grad_checkpoint: true
+grad_accumulation_steps: 2
+seed: 42

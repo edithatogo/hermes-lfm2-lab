@@ -4,6 +4,8 @@ Training and packaging workspace for LFM/LFM2-family Hermes-style fine-tunes.
 
 Status: scaffolded, with LFM2 default and Ministral as an adjacent 8B edge-model experiment.
 
+Smoke proof: `LiquidAI/LFM2.5-1.2B-Instruct` completed a 10-iteration MLX LoRA run on the MacBook Pro M1 Max target and saved a local adapter under `experiments/lfm25-1.2b-instruct-smoke/lora_adapter`.
+
 Folder structure:
 - data/raw/ — raw collected conversations
 - data/clean/ — cleaned, deduped conversations
@@ -18,6 +20,9 @@ Folder structure:
 Configs:
 
 - `scripts/train_config.yaml` — LiquidAI/LFM2-8B-A1B default.
+- `scripts/train_config.lfm25-1.2b-instruct.smoke.yaml` — 10-iteration LFM2.5 proof run.
+- `scripts/train_config.lfm25-1.2b-instruct.yaml` — LFM2.5 low-latency instruct target.
+- `scripts/train_config.lfm25-1.2b-thinking.yaml` — LFM2.5 low-latency reasoning target.
 - `scripts/train_config.ministral.yaml` — Ministral 3 8B experiment.
 
 Runtime targets:
