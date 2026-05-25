@@ -21,6 +21,41 @@ import sys
 import time
 from pathlib import Path
 
+
+def ensure_mlx_adapter_config(adapter_path: str | None) -> None:
+    """Upgrade older local MLX LoRA config files to the current loader shape."""
+    if not adapter_path:
+        return
+    config_path = Path(adapter_path) / "adapter_config.json"
+    if not config_path.exists():
+        return
+
+    with config_path.open("r", encoding="utf-8") as handle:
+        config = json.load(handle)
+    if not isinstance(config, dict):
+        raise ValueError(f"{config_path}: expected JSON object")
+
+    changed = False
+    if "fine_tune_type" not in config:
+        config["fine_tune_type"] = "lora"
+        changed = True
+    if "num_layers" not in config and "lora_layers" in config:
+        config["num_layers"] = config["lora_layers"]
+        changed = True
+    if "lora_parameters" not in config:
+        required = ("lora_rank", "lora_scale", "lora_dropout")
+        if all(key in config for key in required):
+            config["lora_parameters"] = {
+                "rank": config["lora_rank"],
+                "scale": config["lora_scale"],
+                "dropout": config["lora_dropout"],
+            }
+            changed = True
+
+    if changed:
+        config_path.write_text(json.dumps(config, indent=2) + "\n", encoding="utf-8")
+        print(f"Updated adapter config for current MLX loader: {config_path}")
+
 def load_prompts(filepath: Path):
     """Load prompts from eval/prompts.jsonl."""
     prompts = []
@@ -76,6 +111,7 @@ def main():
     from mlx_lm import load
     print(f"\nLoading model: {args.model}")
     t0 = time.time()
+    ensure_mlx_adapter_config(args.adapter)
     model, tokenizer = load(args.model, adapter_path=args.adapter)
     print(f"  Loaded in {time.time()-t0:.1f}s")
 
